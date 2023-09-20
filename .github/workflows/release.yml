@@ -1,0 +1,43 @@
+name: Release Console Application
+
+on: 
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]'
+  workflow_dispatch:
+
+jobs:
+  release:
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        os: [windows-latest]
+        nuget: [latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Restore Msbuild Packages
+        run: |
+          msbuild.exe -t:restore QuickAccessConsole.sln
+
+      - name: Build Solution
+        run: |
+          msbuild.exe QuickAccessConsole.sln /p:platform="Any CPU" /p:configuration="Release"
+
+      - name: Create Draft Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./bin/Release/QuickAccessConsole.dll
+          tag_name: ${{ github.ref }}
+          body: |
+            Description of the draft release.
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
