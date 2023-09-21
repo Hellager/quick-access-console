@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [windows-latest]
         nuget: [latest]
-        dotnet: [latest]
+        dotnet: ['6.x']
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
