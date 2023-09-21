@@ -14,17 +14,23 @@ jobs:
       matrix:
         os: [windows-latest]
         nuget: [latest]
+        dotnet: [latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up .NET Framework
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+        
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
 
-      - name: Restore Msbuild Packages
+      - name: Restore Nuget Packages
         run: |
-          msbuild.exe -t:restore QuickAccessConsole.sln
+          nuget restore QuickAccessConsole.sln
 
       - name: Build Solution
         run: |
@@ -35,7 +41,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./bin/Release/QuickAccessConsole.dll
+            ./bin/Release/QuickAccessConsole.exe
           tag_name: ${{ github.ref }}
           body: |
             Description of the draft release.
