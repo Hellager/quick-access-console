@@ -16,8 +16,8 @@ namespace QuickAccessConsole
         [Verb("list", HelpText = "List current quick acess or supported languages.")]
         class ListOptions
         {
-            [Option('a', "all", Required = false, HelpText = "List both recent files and frequent folders.")]
-            public bool IsListAllAccess { get; set; }
+            [Option('q', "quick-access", Required = false, HelpText = "List quick access.")]
+            public bool IsListQuickAccess { get; set; }
 
             [Option('r', "recent-files", Required = false, HelpText = "List recent files.")]
             public bool IsListRecentFiles { get; set; }
@@ -127,7 +127,7 @@ namespace QuickAccessConsole
             {
                 dictRes = handler.GetFrequentFoldersDict();
             }
-            else if (options.IsListRecentFiles)
+            else if (options.IsListQuickAccess)
             {
                 dictRes = handler.GetQuickAccessDict();
             }
