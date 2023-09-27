@@ -77,7 +77,8 @@ namespace QuickAccessConsole
 
         private class OutputData
         {
-            public ArrayList Data { get; set; }
+            public Dictionary<string, string> DictData { get; set; }
+            public ArrayList ArrData { get; set; }
             public string Type { get; set; }
             public ArrayList Debug { get; set; }
         }
@@ -99,11 +100,12 @@ namespace QuickAccessConsole
                 );
         }
 
-        private static string BuildOutputData(ArrayList input, string type, ArrayList debug)
+        private static string BuildOutputData(Dictionary<string, string> dict, ArrayList arr, string type, ArrayList debug)
         {
             var output = new OutputData
             {
-                Data = input,
+                DictData = dict,
+                ArrData = arr,
                 Type = type,
                 Debug = debug
             };
@@ -113,47 +115,38 @@ namespace QuickAccessConsole
 
         private static int HandleListOptions(ListOptions options, QuickAccessHandler handler)
         {
-            List<string> res = new List<string>() { };
-            string uiCultureName = "";
+            Dictionary<string, string> dictRes = new Dictionary<string, string>() { };
+            ArrayList arrRes = new ArrayList() { };
+            ArrayList debugRes = new ArrayList() { };
 
             if (options.IsListRecentFiles)
             {
-                res = handler.GetRecentFilesList();
+                dictRes = handler.GetRecentFilesDict();
             }
             else if (options.IsListFrequentFolders)
             {
-                res = handler.GetFrequentFoldersList();
+                dictRes = handler.GetFrequentFoldersDict();
             }
             else if (options.IsListRecentFiles)
             {
-                res = handler.GetQuickAccessList();
+                dictRes = handler.GetQuickAccessDict();
             }
             else if (options.IsListUICulture)
             {
-                uiCultureName = handler.GetSystemUICultureCode();
+                string code = handler.GetSystemUICultureCode();
+                arrRes.Add(code);
             }
 
-            ArrayList _data = new ArrayList { };
-            foreach (var item in res)
-            {
-                _data.Add(item);
-            }
-
-            if (uiCultureName != "")
-            {
-                _data.Add(uiCultureName);
-            }
-
-            ArrayList _debug = new ArrayList { };
-            Console.WriteLine(BuildOutputData(_data, "list", _debug));
+            Console.WriteLine(BuildOutputData(dictRes, arrRes, "list", debugRes));
 
             return 0;
         }
 
         private static int HandleRemoveOptions(IEnumerable<string> args, RemoveOptions options, QuickAccessHandler handler)
         {
-            ArrayList _data = new ArrayList { };
-            ArrayList _debug = new ArrayList { };
+            Dictionary<string, string> dictRes = new Dictionary<string, string>() { };
+            ArrayList arrRes = new ArrayList() { };
+            ArrayList debugRes = new ArrayList() { };
 
             List<string> menuNameList = options.MenuNames.ToList<string>();
             List<string> removeList = options.RemoveItems.ToList<string>();
@@ -173,10 +166,10 @@ namespace QuickAccessConsole
             });
             if (!task.Wait(10 * 1000, taskCancelToken.Token))
             {
-                _debug.Add("remove timeout");
+                debugRes.Add("remove timeout");
                 Console.Error.WriteLine("Remove function timeout");
 
-                Console.WriteLine(BuildOutputData(_data, "remove", _debug));
+                Console.WriteLine(BuildOutputData(dictRes, arrRes, "remove", debugRes));
                 return -1;
             }
 
@@ -184,17 +177,19 @@ namespace QuickAccessConsole
             {
                 bool res = handler.IsInQuickAccess(item);
 
-                _data.Add(res);
+                arrRes.Add(res);
             }
 
-            Console.WriteLine(BuildOutputData(_data, "remove", _debug));
+            Console.WriteLine(BuildOutputData(dictRes, arrRes, "remove", debugRes));
 
             return 0;
         }
 
         private static int HandleCheckOptions(IEnumerable<string> args, CheckOptions options, QuickAccessHandler handler)
         {
-            ArrayList res = new ArrayList { };
+            Dictionary<string, string> dictRes = new Dictionary<string, string>() { };
+            ArrayList arrRes = new ArrayList() { };
+            ArrayList debugRes = new ArrayList() { };
 
             List<string> menuNameList = options.MenuNames.ToList<string>();
 
@@ -211,18 +206,17 @@ namespace QuickAccessConsole
                 foreach (var item in options.Target)
                 {
                     bool isInQuickAccess = handler.IsInQuickAccess(item);
-                    res.Add(isInQuickAccess);
+                    arrRes.Add(isInQuickAccess);
                 }
             }
             else if (options.IsSupportedSystem)
             {
                 bool isSupported = handler.IsSupportedSystem();
 
-                res.Add(isSupported);
+                arrRes.Add(isSupported);
             }
 
-            ArrayList _debug = new ArrayList { };
-            Console.WriteLine(BuildOutputData(res, "check", _debug));
+            Console.WriteLine(BuildOutputData(dictRes, arrRes, "check", debugRes));
 
             return 0;
         }
